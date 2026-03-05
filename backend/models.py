@@ -12,6 +12,9 @@ class Task:
     updated_at: Optional[datetime] = None
 
     def to_dict(self):
+        """
+        Passer les données sous la forme d'un dictionnaire.
+        """
         return {
             "id": self.id, "title": self.title, "description": self.description,
             "is_active": self.is_active,
