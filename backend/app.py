@@ -113,6 +113,7 @@ def create_task():
     """
     data = request.get_json()
     if not data or not data.get("title"):
+        app.logger.warning("Bad request: missing title")
         return jsonify({"error": "Title is required"}), 400
     db = get_db()
     prev_autocommit = db.autocommit
@@ -156,6 +157,7 @@ def update_task(task_id):
     cur.execute("SELECT * FROM tasks WHERE id = %s", (task_id,))
     task = cur.fetchone()
     if not task:
+        app.logger.warning(f"Task not found: {task_id}")
         return jsonify({"error": "Not found"}), 404
     title = data.get("title", task["title"])
     description = data.get("description", task["description"])
