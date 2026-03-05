@@ -52,7 +52,25 @@ def after_request(response):
 
 @app.route("/health")
 def health():
-    return jsonify({"status": "ok", "timestamp": datetime.now(timezone.utc).isoformat()})
+    db_status = "ok"
+    try:
+        db = get_db()
+        cur = db.cursor()
+        cur.execute("SELECT 1")
+    except Exception:
+        db_status = "error"
+    redis_status = "ok"
+    try:
+        r = get_redis()
+        r.ping()
+    except Exception:
+        redis_status = "error"
+    return jsonify({
+        "status": "ok",
+        "database": db_status,
+        "redis": redis_status,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    })
 
 @app.route("/api/tasks", methods=["GET"])
 def list_tasks():
