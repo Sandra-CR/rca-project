@@ -61,6 +61,26 @@ services:
       timeout: 5s
       retries: 5
 
+  backend_tests:
+    build: ./backend
+    working_dir: /app
+    command: pytest tests
+    environment:
+      REDIS_URL: "redis://redis:6379/0"
+    depends_on:
+      - backend
+    volumes:
+      - ./backend:/app
+
+  frontend_tests:
+    image: node:18-alpine
+    working_dir: /app
+    command: sh -lc "npm ci && npm test -- --watchAll=false"
+    depends_on:
+      - frontend
+    volumes:
+      - ./frontend:/app
+
 volumes:
   postgres_data:
 
