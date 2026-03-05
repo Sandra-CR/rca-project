@@ -1,23 +1,23 @@
 {
-  "generated_at": "2026-03-05T13:27:59.923896+00:00",
+  "generated_at": "2026-03-05T13:36:42.524076+00:00",
   "checks": {
     "backend_builds": true,
     "frontend_builds": true,
     "frontend_port": true,
-    "redis_connected": false,
+    "redis_connected": true,
     "db_schema_valid": true,
     "backend_imports": true,
-    "db_connection": false,
-    "api_query_works": false,
+    "db_connection": true,
+    "api_query_works": true,
     "frontend_api_call": false,
-    "cors_works": false,
+    "cors_works": true,
     "frontend_deps": false,
-    "cache_consistent": false,
+    "cache_consistent": true,
     "no_duplicates": false,
     "no_memory_leak": true,
-    "db_ready_check": false,
+    "db_ready_check": true,
     "errors_logged": false,
-    "timezone_filter": false,
+    "timezone_filter": true,
     "no_circular_dep": true
   }
 }
