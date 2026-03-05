@@ -33,6 +33,7 @@ services:
     build: ./frontend
     ports:
       - "3000:8080"
+    working_dir: /app
     depends_on:
       - backend
     volumes:
