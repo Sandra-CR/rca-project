@@ -111,6 +111,8 @@ def create_task():
     db = get_db()
     prev_autocommit = db.autocommit
     db.autocommit = False
+    task = None
+    status = 200
     try:
         cur = db.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cur.execute("SELECT pg_advisory_xact_lock(hashtext(%s))", (data["title"],))
@@ -128,15 +130,21 @@ def create_task():
             r = get_redis()
             r.delete("stats")
         db.commit()
-    except Exception:
+    except Exception as e:
         db.rollback()
-        raise
+        app.logger.error(f"Erreur insertion: {e}")
+        return jsonify({"error": "Internal server error"}), 500
     finally:
         db.autocommit = prev_autocommit
+    if task is None:
+        return jsonify({"error": "Failed to retrieve or create task"}), 500
     return jsonify({
-        "id": task["id"], "title": task["title"], "description": task["description"],
-        "is_active": task["is_active"], "created_at": task["created_at"].isoformat(),
-        "updated_at": task["updated_at"].isoformat(),
+        "id": task["id"],
+        "title": task["title"],
+        "description": task["description"],
+        "is_active": task["is_active"],
+        "created_at": task["created_at"].isoformat() if task["created_at"] else None,
+        "updated_at": task["updated_at"].isoformat() if task["updated_at"] else None,
     }), status
 
 @app.route("/api/tasks/<int:task_id>", methods=["PUT"])
@@ -156,12 +164,17 @@ def update_task(task_id):
         (title, description, is_active, datetime.now(timezone.utc), task_id)
     )
     updated = cur.fetchone()
+    if updated is None:
+        return jsonify({"error": "Erreur lors de la mise à jour"}), 500
     r = get_redis()
     r.delete("stats")
     return jsonify({
-        "id": updated["id"], "title": updated["title"], "description": updated["description"],
-        "is_active": updated["is_active"], "created_at": updated["created_at"].isoformat(),
-        "updated_at": updated["updated_at"].isoformat(),
+        "id": updated["id"],
+        "title": updated["title"],
+        "description": updated["description"],
+        "is_active": updated["is_active"],
+        "created_at": updated["created_at"].isoformat() if updated.get("created_at") else None,
+        "updated_at": updated["updated_at"].isoformat() if updated.get("updated_at") else None,
     })
 
 @app.route("/api/tasks/<int:task_id>", methods=["DELETE"])
@@ -200,10 +213,11 @@ def get_stats():
     db = get_db()
     cur = db.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     cur.execute("SELECT COUNT(*) as total, COUNT(*) FILTER (WHERE is_active = true) as active, COUNT(*) FILTER (WHERE is_active = false) as done FROM tasks")
-    stats = cur.fetchone()
+    result = cur.fetchone()
+    stats_dict = dict(result) if result else {"total": 0, "active": 0, "done": 0}
     import json
-    r.setex("stats", 1, json.dumps(dict(stats)))
-    return jsonify(dict(stats))
+    r.setex("stats", 1, json.dumps(stats_dict))
+    return jsonify(dict(stats_dict))
 
 def warmup_cache():
     try:
