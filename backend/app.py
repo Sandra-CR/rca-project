@@ -62,7 +62,7 @@ def list_tasks():
     conditions = []
     params = []
     if status:
-        conditions.append("active = true" if status == "active" else "active = false")
+        conditions.append("is_active = true" if status == "active" else "active = false")
     if today_only:
         conditions.append("DATE(created_at) = DATE(%s)")
         params.append(datetime.now())
@@ -176,7 +176,7 @@ def warmup_cache():
     except Exception as e:
         print(f"Cache warmup failed (non-critical): {e}")
 
-warmup_cache()
+# warmup_cache()
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8000, debug=True)
