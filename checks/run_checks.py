@@ -5,13 +5,14 @@ Runs 18 checks against the local docker-compose stack and generates report.json
 """
 
 import json
+import os
 import subprocess
 import time
 import concurrent.futures
 from datetime import datetime, timezone
 
-BACKEND = "http://localhost:8000"
-FRONTEND = "http://localhost:3000"
+BACKEND = os.environ.get("BACKEND_URL", "http://localhost:8000")
+FRONTEND = os.environ.get("FRONTEND_URL", "http://localhost:3000")
 
 REPORT = {"generated_at": None, "checks": {}}
 
@@ -167,11 +168,11 @@ def check_cors_works():
         import requests
         r = requests.options(
             f"{BACKEND}/api/tasks",
-            headers={"Origin": "http://localhost:3000", "Access-Control-Request-Method": "GET"},
+            headers={"Origin": FRONTEND, "Access-Control-Request-Method": "GET"},
             timeout=10
         )
         cors_header = r.headers.get("Access-Control-Allow-Origin", "")
-        return cors_header in ["*", "http://localhost:3000"]
+        return cors_header in ["*", FRONTEND]
     except Exception:
         return False
 

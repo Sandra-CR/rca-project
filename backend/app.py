@@ -14,7 +14,14 @@ CORS(app)
 DATABASE_URL = os.environ.get("DATABASE_URL")
 if not DATABASE_URL:
     raise ValueError("DATABASE_URL environment variable is not set")
-REDIS_URL = os.environ["REDIS_URL"]
+REDIS_URL = os.environ.get("REDIS_URL")
+if not REDIS_URL:
+    raise ValueError("REDIS_URL environment variable is not set")
+
+FLASK_PORT = int(os.environ.get("FLASK_PORT", 8000))
+FLASK_ENV = os.environ.get("FLASK_ENV", "development")
+FLASK_DEBUG = os.environ.get("FLASK_DEBUG", "False").lower() == "true"
+BACKEND_API_URL = os.environ.get("BACKEND_API_URL", "http://localhost:8000")
 
 search_history = []
 
@@ -176,11 +183,11 @@ def warmup_cache():
         r = redis.from_url(REDIS_URL)
         r.ping()
         import urllib.request
-        urllib.request.urlopen("http://localhost:8000/api/stats")
+        urllib.request.urlopen(f"{BACKEND_API_URL}/api/stats")
     except Exception as e:
         print(f"Cache warmup failed (non-critical): {e}")
 
 # warmup_cache()
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8000, debug=True)
+    app.run(host="0.0.0.0", port=FLASK_PORT, debug=FLASK_DEBUG)

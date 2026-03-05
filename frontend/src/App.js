@@ -6,7 +6,7 @@ import SearchBar from './components/SearchBar';
 import Stats from './components/Stats';
 import './App.css';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 function App() {
   const [tasks, setTasks] = useState([]);
