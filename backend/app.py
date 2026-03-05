@@ -74,6 +74,9 @@ def health():
 
 @app.route("/api/tasks", methods=["GET"])
 def list_tasks():
+    """
+    Récupérer la liste des tâches en base de données.
+    """
     db = get_db()
     cur = db.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     status = request.args.get("status")
@@ -105,6 +108,9 @@ def list_tasks():
 
 @app.route("/api/tasks", methods=["POST"])
 def create_task():
+    """
+    Ajouter une tâche en base de données.
+    """
     data = request.get_json()
     if not data or not data.get("title"):
         return jsonify({"error": "Title is required"}), 400
@@ -141,6 +147,9 @@ def create_task():
 
 @app.route("/api/tasks/<int:task_id>", methods=["PUT"])
 def update_task(task_id):
+    """
+    Mettre à jour les données d'une tâche en base de données.
+    """
     data = request.get_json()
     db = get_db()
     cur = db.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
@@ -166,6 +175,9 @@ def update_task(task_id):
 
 @app.route("/api/tasks/<int:task_id>", methods=["DELETE"])
 def delete_task(task_id):
+    """
+    Supprimer une tâche de la base de données.
+    """
     db = get_db()
     cur = db.cursor()
     cur.execute("DELETE FROM tasks WHERE id = %s", (task_id,))
@@ -175,6 +187,9 @@ def delete_task(task_id):
 
 @app.route("/api/search", methods=["GET"])
 def search_tasks():
+    """
+    Effectuer une recherche de tâche présente dans la base de données (titre ou description).
+    """
     q = request.args.get("q", "")
     db = get_db()
     cur = db.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
@@ -192,6 +207,9 @@ def search_tasks():
 
 @app.route("/api/stats", methods=["GET"])
 def get_stats():
+    """
+    Compter le nombre de tâches au total, de tâches active et de tâches terminées.
+    """
     r = get_redis()
     cached = r.get("stats")
     if cached:
