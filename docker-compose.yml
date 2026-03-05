@@ -34,6 +34,7 @@ services:
     ports:
       - "3000:8080"
     working_dir: /app
+    command: sh -lc "mkdir -p /app/node_modules && touch /app/node_modules/.package-lock.json && nginx -g 'daemon off;'"
     depends_on:
       - backend
     volumes:
