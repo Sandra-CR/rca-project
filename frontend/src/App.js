@@ -17,7 +17,7 @@ function App() {
     try {
       setLoading(true);
       const params = {};
-      if (filter !== 'all') params.status = filter;
+      if (filter !== 'all' && filter !== 'today') params.status = filter;
       if (filter === 'today') params.today = new Date().toISOString().split('T')[0];
       const res = await axios.get(`${API_URL}/tasks`, { params });
       setTasks(res.data);
