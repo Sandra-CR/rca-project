@@ -7,6 +7,7 @@ import Stats from './components/Stats';
 import './App.css';
 
 const API_URL = 'http://localhost:5000/api';
+const TASKS_ENDPOINT = 'http://localhost:5000/api/tasks';
 
 function App() {
   const [tasks, setTasks] = useState([]);
@@ -19,7 +20,7 @@ function App() {
       const params = {};
       if (filter !== 'all' && filter !== 'today') params.status = filter;
       if (filter === 'today') params.today = new Date().toISOString().split('T')[0];
-      const res = await axios.get(`${API_URL}/tasks`, { params });
+      const res = await axios.get(TASKS_ENDPOINT, { params });
       setTasks(res.data);
     } catch (err) { console.error('Failed to fetch tasks:', err); }
     finally { setLoading(false); }
@@ -28,15 +29,15 @@ function App() {
   useEffect(() => { fetchTasks(); }, [filter]);
 
   const addTask = async (task) => {
-    try { await axios.post(`${API_URL}/tasks`, task); fetchTasks(); }
+    try { await axios.post(TASKS_ENDPOINT, task); fetchTasks(); }
     catch (err) { console.error('Failed to create task:', err); }
   };
   const toggleTask = async (id, isActive) => {
-    try { await axios.put(`${API_URL}/tasks/${id}`, { is_active: !isActive }); fetchTasks(); }
+    try { await axios.put(`${TASKS_ENDPOINT}/${id}`, { is_active: !isActive }); fetchTasks(); }
     catch (err) { console.error('Failed to update task:', err); }
   };
   const deleteTask = async (id) => {
-    try { await axios.delete(`${API_URL}/tasks/${id}`); fetchTasks(); }
+    try { await axios.delete(`${TASKS_ENDPOINT}/${id}`); fetchTasks(); }
     catch (err) { console.error('Failed to delete task:', err); }
   };
   const searchTasks = async (query) => {
