@@ -6,8 +6,8 @@ import SearchBar from './components/SearchBar';
 import Stats from './components/Stats';
 import './App.css';
 
-const API_URL = 'http://localhost:5000/api';
-const TASKS_ENDPOINT = 'http://localhost:5000/api/tasks';
+const API_URL = 'http://localhost:8000/api';
+const TASKS_ENDPOINT = 'http://localhost:8000/api/tasks';
 
 function App() {
   const [tasks, setTasks] = useState([]);
