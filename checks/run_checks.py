@@ -10,7 +10,7 @@ import time
 import concurrent.futures
 from datetime import datetime, timezone
 
-BACKEND = "http://localhost:8000"
+BACKEND = "http://localhost:5000"
 FRONTEND = "http://localhost:3000"
 
 REPORT = {"generated_at": None, "checks": {}}
