@@ -109,19 +109,35 @@ def create_task():
     if not data or not data.get("title"):
         return jsonify({"error": "Title is required"}), 400
     db = get_db()
-    cur = db.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-    cur.execute(
-        "INSERT INTO tasks (title, description, is_active, created_at, updated_at) VALUES (%s, %s, %s, %s, %s) RETURNING *",
-        (data["title"], data.get("description", ""), True, datetime.now(timezone.utc), datetime.now(timezone.utc))
-    )
-    task = cur.fetchone()
-    r = get_redis()
-    r.delete("stats")
+    prev_autocommit = db.autocommit
+    db.autocommit = False
+    try:
+        cur = db.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cur.execute("SELECT pg_advisory_xact_lock(hashtext(%s))", (data["title"],))
+        cur.execute("SELECT * FROM tasks WHERE title = %s", (data["title"],))
+        task = cur.fetchone()
+        status = 200
+        if not task:
+            cur.execute(
+                "INSERT INTO tasks (title, description, is_active, created_at, updated_at) "
+                "VALUES (%s, %s, %s, %s, %s) RETURNING *",
+                (data["title"], data.get("description", ""), True, datetime.now(timezone.utc), datetime.now(timezone.utc))
+            )
+            task = cur.fetchone()
+            status = 201
+            r = get_redis()
+            r.delete("stats")
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+    finally:
+        db.autocommit = prev_autocommit
     return jsonify({
         "id": task["id"], "title": task["title"], "description": task["description"],
         "is_active": task["is_active"], "created_at": task["created_at"].isoformat(),
         "updated_at": task["updated_at"].isoformat(),
-    }), 201
+    }), status
 
 @app.route("/api/tasks/<int:task_id>", methods=["PUT"])
 def update_task(task_id):
